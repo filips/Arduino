@@ -198,6 +198,7 @@ int digitalRead(uint8_t pin);
 int analogRead(uint8_t pin);
 void analogReference(uint8_t mode);
 void analogWrite(uint8_t pin, int val);
+void analogMultiWrite(uint8_t pins[], int vals[], int n);
 void analogWriteFreq(uint32_t freq);
 void analogWriteRange(uint32_t range);
 

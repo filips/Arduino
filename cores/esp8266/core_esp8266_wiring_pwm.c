@@ -142,6 +142,33 @@ extern void __analogWrite(uint8_t pin, int value) {
 	}
 }
 
+void __analogMultiWrite(uint8_t pins[], int vals[], int n) {
+	uint32_t orig_mask = pwm_mask;
+
+	for(int i = 0; i < n; i++) {
+		if(vals[i] == 0){
+			pwm_mask &= ~(1 << pins[i]);
+			digitalWrite(pins[i], LOW);
+			continue;
+		}
+		if((pwm_mask & (1 << pins[i])) == 0){
+			pwm_mask |= (1 << pins[i]);
+			pinMode(pins[i], OUTPUT);
+			digitalWrite(pins[i], LOW);
+		}
+		pwm_values[pins[i]] = vals[i] % (pwm_range + 1);
+	}
+
+	prep_pwm_steps();
+	if (orig_mask != pwm_mask) {
+		if (pwm_mask == 0) {
+			timer1_disable();
+		} else {
+			pwm_start_timer();
+		}
+	}
+}
+
 extern void __analogWriteFreq(uint32_t freq){
   pwm_freq = freq;
   prep_pwm_steps();
@@ -153,5 +180,6 @@ extern void __analogWriteRange(uint32_t range){
 }
 
 extern void analogWrite(uint8_t pin, int val) __attribute__ ((weak, alias("__analogWrite")));
+extern void analogMultiWrite(uint8_t pins[], int vals[], int n) __attribute__ ((weak, alias("__analogMultiWrite")));
 extern void analogWriteFreq(uint32_t freq) __attribute__ ((weak, alias("__analogWriteFreq")));
 extern void analogWriteRange(uint32_t range) __attribute__ ((weak, alias("__analogWriteRange")));
